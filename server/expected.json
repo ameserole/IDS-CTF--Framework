@@ -1,1 +1,2 @@
 {"src_ip":"165.91.9.89","dest_ip":"8.8.8.8","proto":"ICMP","icmp_type":8,"icmp_code":0}
+{"src_ip":"165.91.9.89","dest_ip":"8.8.4.4","proto":"ICMP","icmp_type":8,"icmp_code":0}
