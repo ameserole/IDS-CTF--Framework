@@ -3,8 +3,9 @@ import os
 import subprocess
 import tempfile
 import json
+import threading
 
-class MyTCPHandler(socketserver.BaseRequestHandler):
+class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     """
     The request handler class for our server.
 
@@ -47,6 +48,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         return False, "Not enough alerts"
 
     def handle(self):
+        cur_thread = threading.current_thread()
+        print("Thread {} Handling Connection".format(cur_thread.name))
         self.request.sendall("Enter Rule(s):\n".encode())
         rules = self.request.recv(1024).strip().decode()
 
@@ -73,11 +76,19 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
         self.request.sendall(result.encode())
 
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    pass
+
 if __name__ == "__main__":
     HOST, PORT = "0.0.0.0", 9999
 
     # Create the server, binding to localhost on port 9999
-    with socketserver.TCPServer((HOST, PORT), MyTCPHandler) as server:
+    with ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler) as server:
         # Activate the server; this will keep running until you
         # interrupt the program with Ctrl-C
+        # server.serve_forever()
+        server_thread = threading.Thread(target=server.serve_forever)
+        server_thread.daemon = True
+        print("Starting Thread")
+        server_thread.start() 
         server.serve_forever()
